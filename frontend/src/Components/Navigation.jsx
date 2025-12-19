@@ -1,5 +1,5 @@
 import React from "react";
-import bgimg from "../../public/gradient.jpg";
+import bgimg from "/gradient.jpg";
 import "../animation.css";
 
 const Navigation = ({ setShowModal }) => {

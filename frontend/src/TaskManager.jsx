@@ -11,6 +11,7 @@ const TaskManager = () => {
   const [userTasks, setUserTasks] = useState(null);
   const [filteredTasks, setFilteredTasks] = useState(null);
   const [moreInfo, setMoreInfo] = useState(null);
+  const [editModal, setEditModal] = useState(null);
 
   const filters = ["All", "Completed"];
 
@@ -131,6 +132,56 @@ const TaskManager = () => {
     }
   };
 
+  // ====== EDIT TASK
+  const editTask = async (e) => {
+    e.preventDefault();
+
+    // Collect form data
+    const formData = new FormData(e.target);
+    const taskData = Object.fromEntries(formData.entries());
+
+    const dataObj = {
+      id: editModal._id,
+      task: taskData.task,
+      description: taskData.description,
+      date: taskData.date,
+    };
+
+    console.log(dataObj);
+
+    try {
+      // Prepare POST request
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataObj),
+      };
+
+      // Send data to backend
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}changetask`,
+        requestOptions
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+
+        setEditModal(null);
+
+        // Refresh task list
+        fetchTasks();
+      } else {
+        console.error(
+          "Failed to add task:",
+          response.status,
+          response.statusText
+        );
+      }
+    } catch (err) {
+      console.error("Error adding task:", err);
+    }
+  };
+
   return (
     <main className="bg-[#F4F5FF] min-h-screen relative">
       <TaskModal
@@ -138,6 +189,94 @@ const TaskManager = () => {
         showModal={showModal}
         setShowModal={setShowModal}
       />
+
+      {editModal && (
+        <div
+          onClick={() => setEditModal(false)}
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-[480px] bg-white rounded-xl shadow-xl p-6 animate-[fadeScaleIn_0.25s_ease-out_forwards]"
+          >
+            {/* HEADER */}
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Update Task
+                </h2>
+                <p className="text-xs text-gray-500">
+                  Modify task details below
+                </p>
+              </div>
+
+              <button
+                onClick={() => setEditModal(false)}
+                className="text-gray-400 hover:text-red-500 text-xl transition"
+              >
+                x
+              </button>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={editTask} className="space-y-4">
+              {/* TITLE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Task Title
+                </label>
+                <input
+                  required
+                  type="text"
+                  name="task"
+                  defaultValue={editModal?.task}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Edit task title"
+                />
+              </div>
+
+              {/* DATE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date
+                </label>
+                <input
+                  required
+                  type="date"
+                  name="date"
+                  defaultValue={editModal?.date}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* DESCRIPTION */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  name="description"
+                  defaultValue={editModal?.description}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Edit task description"
+                />
+              </div>
+
+              {/* ACTION */}
+              <div className="pt-3">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition"
+                >
+                  Update Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <MoreInfo moreInfo={moreInfo} setMoreInfo={setMoreInfo} />
 
@@ -184,6 +323,8 @@ const TaskManager = () => {
           setMoreInfo={setMoreInfo}
           toggleComplete={toggleComplete}
           deleteitem={deleteitem}
+          editTask={editTask}
+          setEditModal={setEditModal}
         />
       )}
     </main>

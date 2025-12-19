@@ -1,6 +1,10 @@
-import React from "react";
-
-const Tasks = ({ filteredTasks, setMoreInfo, toggleComplete, deleteitem }) => {
+const Tasks = ({
+  filteredTasks,
+  setMoreInfo,
+  toggleComplete,
+  deleteitem,
+  editTask,setEditModal
+}) => {
   return (
     <div className="flex flex-wrap justify-center gap-[15px] mt-[20px]">
       {filteredTasks.map((item) => (
@@ -32,6 +36,13 @@ const Tasks = ({ filteredTasks, setMoreInfo, toggleComplete, deleteitem }) => {
           </div>
 
           <div className="flex justify-end gap-x-[6px] mt-4">
+            <button
+              className="px-2 py-1 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition"
+              onClick={() => setEditModal(item)}
+            >
+              Edit
+            </button>
+
             <button
               onClick={() => toggleComplete(item)}
               className={`px-2 py-1 rounded-md text-sm font-medium transition ${
